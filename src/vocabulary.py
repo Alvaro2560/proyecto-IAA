@@ -51,8 +51,8 @@ def preprocess_text(text):
   tokens = ['URL' if 'http' in word else word for word in tokens]
 
   # # Truncar las palabras a su raíz usando stemming
-  # stemmer = PorterStemmer()
-  # tokens = [stemmer.stem(word) for word in tokens]
+  stemmer = PorterStemmer()
+  tokens = [stemmer.stem(word) for word in tokens]
 
   # Eliminar palabras que contienen números y no significan nada
   tokens = [word for word in tokens if not any(char.isdigit() for char in word)]
@@ -62,14 +62,19 @@ def preprocess_text(text):
 # Preprocesar todos los textos completos
 textos_procesados = [preprocess_text(texto) for texto in textos_completos]
 
+def guardar_vocabulario(vocabulario, nombre_archivo):
+  with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
+    archivo.write(f"Número de palabras: {len(vocabulario)}\n")
+    for palabra in vocabulario:
+      archivo.write(f"{palabra}\n")
+            
 # Crear el vocabulario
 vocabulario = set()
 for texto in textos_procesados:
   for palabra in texto:
     vocabulario.add(palabra)
 
-for palabra in vocabulario:
-  print(palabra)
-
-# Mostrar el tamaño del vocabulario
-print("\nTamaño del vocabulario:", len(vocabulario))
+# Guardar el vocabulario en un archivo
+nombre_archivo = "vocabulario.txt"
+guardar_vocabulario(vocabulario, nombre_archivo)
+print(f"Vocabulario guardado en '{nombre_archivo}' con éxito.")
