@@ -15,24 +15,14 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
+from nltk.corpus import words
+
 
 # Descargar los recursos necesarios de NLTK
 nltk.download('stopwords')
 nltk.download('punkt')
+nltk.download('words')
 
-# Leer el archivo CSV y procesar el texto
-file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'PH_train.csv')
-
-# Lista para almacenar los textos completos
-textos_completos = []
-
-with open(file_path, 'r', encoding='utf-8') as train_file:
-    data = csv.reader(train_file)
-    for row in data:
-        for text in row:
-            textos_completos.append(text)
-
-# Función para preprocesar el texto
 def preprocess_text(text):
   # Convertir a minúsculas
   text = text.lower()
@@ -47,26 +37,47 @@ def preprocess_text(text):
   stop_words = set(stopwords.words('english'))
   tokens = [word for word in tokens if word not in stop_words]
 
-  # Cambiar las palabras que contienen "http" por "URL"
-  tokens = ['URL' if 'http' in word else word for word in tokens]
+  for i in range(len(tokens)):
+    if "http" not in tokens[i]:
+      # Eliminar palabras que contienen números y no significan nada
+      if any(char.isdigit() for char in tokens[i]):
+        tokens[i] = ""
 
-  # # Truncar las palabras a su raíz usando stemming
-  stemmer = PorterStemmer()
-  tokens = [stemmer.stem(word) for word in tokens]
+      # Filtrar palabras por pertenencia al diccionario de palabras comunes
+      if tokens[i] not in word_set:
+        tokens[i] = ""
+    else:
+      tokens[i] = "URL"
 
-  # Eliminar palabras que contienen números y no significan nada
-  tokens = [word for word in tokens if not any(char.isdigit() for char in word)]
-
+  # Eliminar palabras vacías
+  tokens = [word for word in tokens if word != ""]
+  
   return tokens
+
+def guardar_vocabulario(vocabulario, nombre_archivo):
+  vocabulario_ordenado = sorted(list(vocabulario))  # Convertir el conjunto a una lista ordenada alfabéticamente
+  with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
+    archivo.write(f"Número de palabras: {len(vocabulario_ordenado)}\n")
+    for palabra in vocabulario_ordenado:
+      archivo.write(f"{palabra}\n")
+
+# Leer el archivo CSV y procesar el texto
+file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'PH_train.csv')
+
+# Lista para almacenar los textos completos
+textos_completos = []
+
+with open(file_path, 'r', encoding='utf-8') as train_file:
+    data = csv.reader(train_file)
+    for row in data:
+        for text in row:
+            textos_completos.append(text)
+
+# Obtener el conjunto de palabras comunes
+word_set = set(words.words())
 
 # Preprocesar todos los textos completos
 textos_procesados = [preprocess_text(texto) for texto in textos_completos]
-
-def guardar_vocabulario(vocabulario, nombre_archivo):
-  with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
-    archivo.write(f"Número de palabras: {len(vocabulario)}\n")
-    for palabra in vocabulario:
-      archivo.write(f"{palabra}\n")
             
 # Crear el vocabulario
 vocabulario = set()
@@ -75,6 +86,6 @@ for texto in textos_procesados:
     vocabulario.add(palabra)
 
 # Guardar el vocabulario en un archivo
-nombre_archivo = "vocabulario.txt"
+nombre_archivo = "../data/vocabulario.txt"
 guardar_vocabulario(vocabulario, nombre_archivo)
 print(f"Vocabulario guardado en '{nombre_archivo}' con éxito.")
