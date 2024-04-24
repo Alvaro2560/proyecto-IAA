@@ -25,6 +25,7 @@ def calculate_probabilities(vocabulary, corpus):
   for word in vocabulary:
     word_count = corpus_array.count(word)
     probability = math.log((word_count + 1) / total_words)
+    # TODO: Change corpus from set to array to avoid only one word in the corpus
     # word_probabilities['<UNK>'] = math.log(1 / len(corpus))
     word_probabilities[word] = {'count': word_count, 'log_probability': probability}
   return word_probabilities
