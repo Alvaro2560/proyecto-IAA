@@ -12,34 +12,39 @@ import vocabulary
 import os
 import math
 
-train_vocabulary = vocabulary.init('PH_train.csv', 'vocabulario.txt')
-phishing_corpus = vocabulary.init('PH_train_phishing.csv', 'corpusP.txt')
-safe_corpus = vocabulary.init('PH_train_safe.csv', 'corpusS.txt')
+# Create the vocabulary and the corpuses of the phishing and safe training sets.
+train_vocabulary = vocabulary.vocabulary('PH_train.csv', 'vocabulario.txt')
+phishing_corpus = vocabulary.corpus('PH_train_phishing.csv', 'corpusP.txt')
+safe_corpus = vocabulary.corpus('PH_train_safe.csv', 'corpusS.txt')
 
 def calculate_probabilities(vocabulary, corpus):
   word_probabilities = {}
   total_words = len(corpus)
-  corpus_array = []
-  for word in corpus:
-    corpus_array.append(word)
+  unknown_counter = 0
   for word in vocabulary:
-    word_count = corpus_array.count(word)
-    probability = math.log((word_count + 1) / total_words)
-    # TODO: Change corpus from set to array to avoid only one word in the corpus
-    # word_probabilities['<UNK>'] = math.log(1 / len(corpus))
-    word_probabilities[word] = {'count': word_count, 'log_probability': probability}
+    # Count the times the word appears in the corpus.
+    word_count = corpus.count(word)
+    if word_count == 0:
+      unknown_counter += 1
+    else:
+      probability = math.log((word_count + 1) / total_words)
+      word_probabilities[word] = {'count': word_count, 'log_probability': probability}
+  # Calculate the probability of the unknown words.
+  word_probabilities['UNK'] = {'count': unknown_counter, 'log_probability': math.log((unknown_counter + 1) / total_words)}
   return word_probabilities
 
+# Calculate the probabilities of the phishing and safe corpuses.
 phishing_probabilities = calculate_probabilities(train_vocabulary, phishing_corpus)
 safe_probabilities = calculate_probabilities(train_vocabulary, safe_corpus)
 
 def save_probabilities(probabilities, corpus, input_file, output_file):
+  sorted_probabilities =  sorted(probabilities.items(), key=lambda item: (item[0].lower(), item[0]))
   with open(input_file, 'r', encoding='utf-8') as file:
     lines = file.readlines()
   with open(output_file, 'w', encoding='utf-8') as file:
     file.write(f"Número de documentos (noticias) del corpus: {len(lines)}\n")
     file.write(f"Número de palabras del corpus: {len(corpus)}\n")
-    for word, data in probabilities.items():
+    for word, data in sorted_probabilities:
       file.write(f"Palabra:{word} Frec:{data['count']} LogProb:{data['log_probability']}\n")
 
 input_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'PH_train_phishing.csv')
