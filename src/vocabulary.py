@@ -55,13 +55,13 @@ def preprocess_text(text):
   return tokens
 
 def guardar_vocabulario(vocabulario, nombre_archivo):
-  vocabulario_ordenado = sorted(list(vocabulario))  # Convertir el conjunto a una lista ordenada alfabéticamente
+  vocabulario_ordenado = sorted(list(vocabulario), key=lambda palabra: (palabra.lower(), palabra))  # Convertir el conjunto a una lista ordenada alfabéticamente
   with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
     archivo.write(f"Número de palabras: {len(vocabulario_ordenado)}\n")
     for palabra in vocabulario_ordenado:
       archivo.write(f"{palabra}\n")
       
-def init(file_name, output_file):
+def vocabulary(file_name, output_file):
   # Leer el archivo CSV y procesar el texto
   file_path = os.path.join(os.path.dirname(__file__), '..', 'data', file_name)
 
@@ -89,6 +89,35 @@ def init(file_name, output_file):
   print(f"Vocabulario guardado en '{nombre_archivo}' con éxito.")
   
   return vocabulario
+
+def corpus(file_name, output_file):
+  # Leer el archivo CSV y procesar el texto
+  file_path = os.path.join(os.path.dirname(__file__), '..', 'data', file_name)
+
+  # Lista para almacenar los textos completos
+  textos_completos = []
+
+  with open(file_path, 'r', encoding='utf-8') as train_file:
+      data = csv.reader(train_file)
+      for row in data:
+          for text in row:
+              textos_completos.append(text)
+
+  # Preprocesar todos los textos completos
+  textos_procesados = [preprocess_text(texto) for texto in textos_completos]
+              
+  corpus = []
+  
+  for texto in textos_procesados:
+    for palabra in texto:
+      corpus.append(palabra)
+
+  # Guardar el vocabulario en un archivo
+  nombre_archivo = os.path.join(os.path.dirname(__file__), '..', 'data', output_file)
+  guardar_vocabulario(corpus, nombre_archivo)
+  print(f"Vocabulario guardado en '{nombre_archivo}' con éxito.")
+  
+  return corpus
 
 # Obtener el conjunto de palabras comunes
 word_set = set(words.words())
