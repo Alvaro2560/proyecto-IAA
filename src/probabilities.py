@@ -19,18 +19,16 @@ safe_corpus = vocabulary.corpus('PH_train_safe.csv', 'corpusS.txt')
 
 def calculate_probabilities(vocabulary, corpus):
   word_probabilities = {}
-  total_words = len(corpus)
-  unknown_counter = 0
+  corpus_size = len(corpus)
+  vocabulary_size = len(vocabulary)
+  unknown_probability = math.log(1 / (corpus_size + vocabulary_size))
   for word in vocabulary:
     # Count the times the word appears in the corpus.
     word_count = corpus.count(word)
-    if word_count == 0:
-      unknown_counter += 1
-    else:
-      probability = math.log((word_count + 1) / total_words)
-      word_probabilities[word] = {'count': word_count, 'log_probability': probability}
+    probability = math.log((word_count + 1) / (corpus_size + vocabulary_size))
+    word_probabilities[word] = {'count': word_count, 'log_probability': probability}
   # Calculate the probability of the unknown words.
-  word_probabilities['UNK'] = {'count': unknown_counter, 'log_probability': math.log((unknown_counter + 1) / total_words)}
+  word_probabilities['UNK'] = {'count': 0, 'log_probability': math.log(1 / (corpus_size + vocabulary_size))}
   return word_probabilities
 
 # Calculate the probabilities of the phishing and safe corpuses.
