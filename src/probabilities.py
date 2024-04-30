@@ -28,7 +28,7 @@ def calculate_probabilities(vocabulary, corpus):
     probability = math.log((word_count + 1) / (corpus_size + vocabulary_size))
     word_probabilities[word] = {'count': word_count, 'log_probability': probability}
   # Calculate the probability of the unknown words.
-  word_probabilities['UNK'] = {'count': 0, 'log_probability': math.log(1 / (corpus_size + vocabulary_size))}
+  word_probabilities['UNK'] = {'count': 0, 'log_probability': unknown_probability}
   return word_probabilities
 
 # Calculate the probabilities of the phishing and safe corpuses.
