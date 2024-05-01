@@ -93,7 +93,6 @@ def save_classifications(mails, output_file, output_classifications):
     for raw_mail in mails:
       mail = preprocess_mail(raw_mail)
       safe_score, phishing_score, classification = classify(mail)
-      file1.write('\"')
       if len(mails[counter]) >= 10 :
         for i in range(10):
           file1.write(f'{mails[counter][i]}')
@@ -105,38 +104,40 @@ def save_classifications(mails, output_file, output_classifications):
       counter += 1
 
 # Función para calcular la precisión de la clasificación
-def calculate_accuracy(input_classifications, classification):
+def calculate_accuracy(classification):
   with open(classification, 'r', encoding='utf-8') as file:
     reader = csv.reader(file)
     classifications = [row[0] for row in reader]
+  with open(os.path.join(os.path.dirname(__file__), '..', 'data', 'PH_train-refactor.csv'), 'r', encoding='utf-8') as file:
+    input_classifications = [row[2] for row in csv.reader(file)]
   correct = 0
+  input_classifications.pop(0)
   total = len(classifications)
+  no_classifications = 0
   for i in range(total):
+    if len(input_classifications[i]) == 0:
+      no_classifications += 1
+      continue
     if input_classifications[i][0] == classifications[i]:
       correct += 1
-  return correct / total
+  return correct / (total - no_classifications)
 
 def main():
   mails = []
-  input_classifications = []
-  
-  # Leemos los correos y las clasificaciones de los correos en formato csv.
-  with open(os.path.join(os.path.dirname(__file__), '..', 'data', 'PH_train-refactor.csv'), 'r', encoding='utf-8') as file:
-    reader = csv.reader(file)
-    for row in reader:
-      if len(row[2]) > 0:
-        mails.append(row[1])
-        input_classifications.append(row[2])
-  # Eliminamos la primera fila de los correos y las clasificaciones
-  mails.pop(0)
-  input_classifications.pop(0)
+  filename = input('Introduce el nombre del fichero de correos a clasificar (se asume que el fichero está en el directorio ../data): ')
+  # Leemos los correos.
+  with open(os.path.join(os.path.dirname(__file__), '..', 'data', filename), 'r', encoding='utf-8') as file:
+    lines = file.readlines()
+    for line in lines:
+      if len(line) > 0:
+        mails.append(line)
   # Guardamos las clasificaciones de los correos en los ficheros correspondientes
   save_classifications(mails,
                        os.path.join(os.path.dirname(__file__), '..', 'data', 'clasificacion_alu0101437989.csv'), 
                        os.path.join(os.path.dirname(__file__), '..', 'data', 'resumen_alu0101437989.csv'))
   # Leemos las clasificaciones y las comparamos con las clasificaciones originales
   classification = os.path.join(os.path.dirname(__file__), '..', 'data', 'resumen_alu0101437989.csv')
-  print(f'Accuracy: {round(calculate_accuracy(input_classifications, classification), 2)}')
+  print(f'Accuracy: {round(calculate_accuracy(classification), 2)}')
 
 if __name__ == '__main__':
   main()
