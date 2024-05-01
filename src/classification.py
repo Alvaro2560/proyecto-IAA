@@ -103,25 +103,6 @@ def save_classifications(mails, output_file, output_classifications):
       file2.write(f'{classification}\n')
       counter += 1
 
-# Función para calcular la precisión de la clasificación
-def calculate_accuracy(classification):
-  with open(classification, 'r', encoding='utf-8') as file:
-    reader = csv.reader(file)
-    classifications = [row[0] for row in reader]
-  with open(os.path.join(os.path.dirname(__file__), '..', 'data', 'PH_train-refactor.csv'), 'r', encoding='utf-8') as file:
-    input_classifications = [row[2] for row in csv.reader(file)]
-  correct = 0
-  input_classifications.pop(0)
-  total = len(classifications)
-  no_classifications = 0
-  for i in range(total):
-    if len(input_classifications[i]) == 0:
-      no_classifications += 1
-      continue
-    if input_classifications[i][0] == classifications[i]:
-      correct += 1
-  return correct / (total - no_classifications)
-
 def main():
   mails = []
   filename = input('Introduce el nombre del fichero de correos a clasificar (se asume que el fichero está en el directorio ../data): ')
@@ -135,9 +116,6 @@ def main():
   save_classifications(mails,
                        os.path.join(os.path.dirname(__file__), '..', 'data', 'clasificacion_alu0101437989.csv'), 
                        os.path.join(os.path.dirname(__file__), '..', 'data', 'resumen_alu0101437989.csv'))
-  # Leemos las clasificaciones y las comparamos con las clasificaciones originales
-  classification = os.path.join(os.path.dirname(__file__), '..', 'data', 'resumen_alu0101437989.csv')
-  print(f'Accuracy: {round(calculate_accuracy(classification), 2)}')
 
 if __name__ == '__main__':
   main()
