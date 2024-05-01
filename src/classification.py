@@ -114,8 +114,8 @@ def main():
         mails.append(line)
   # Guardamos las clasificaciones de los correos en los ficheros correspondientes
   save_classifications(mails,
-                       os.path.join(os.path.dirname(__file__), '..', 'data', 'clasificacion_alu0101437989.csv'), 
-                       os.path.join(os.path.dirname(__file__), '..', 'data', 'resumen_alu0101437989.csv'))
+                       os.path.join(os.path.dirname(__file__), '..', 'results', 'clasificacion_alu0101437989.csv'), 
+                       os.path.join(os.path.dirname(__file__), '..', 'results', 'resumen_alu0101437989.csv'))
 
 if __name__ == '__main__':
   main()
